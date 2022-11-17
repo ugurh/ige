@@ -1,25 +1,75 @@
-import logo from './logo.svg';
 import './App.css';
+import {getAllPlayers} from "./client";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import Container from './components/Container'
+
+import React, {Component} from 'react';
+import {Avatar, Spin, Table} from "antd";
+
+class App extends Component {
+    state = {
+        players: [],
+        isLoading: false
+    }
+
+    componentDidMount() {
+        this.fetchAllPlayers();
+    }
+
+    fetchAllPlayers = () => {
+        this.setState({isLoading: true});
+
+        getAllPlayers().then(res => res.json()
+            .then(players => {
+                this.setState({players, isLoading: false})
+            }));
+    }
+
+    render() {
+        const {players, isLoading} = this.state;
+
+        if (isLoading) {
+            return (
+                <div className="custom-spin">
+                    <Spin size={"large"}/>
+                </div>
+            );
+        }
+
+        if (players && players.length) {
+            const columns = [
+                {
+                    title: '',
+                    dataIndex: 'avatar',
+                    render: (text, player) => (
+                        <Avatar size={"large"} style={{color: 'white', backgroundColor: 'green'}} alt={"avatar"}>
+                            {`${player.name.charAt(0).toUpperCase()}`}
+                        </Avatar>
+                    )
+                },
+                {
+                    title: 'Name',
+                    dataIndex: 'name',
+                    key: 'name',
+                },
+                {
+                    title: 'Marital Status',
+                    dataIndex: 'martialStatus',
+                    key: 'martialStatus',
+                }
+            ];
+            return (
+                <Container>
+                    <Table dataSource={players} columns={columns} pagination={false}/>
+                </Container>
+            )
+        }
+        return (
+            <div>
+                <p>No Students</p>
+            </div>
+        );
+    }
 }
 
 export default App;
